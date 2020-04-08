@@ -1,0 +1,15 @@
+{
+  "name": "example-app",
+  "version": "1.0.0",
+  "description": "An example Express application to deploy onto openshift",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "daferoli@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "prom-client": "^12.0.0"
+  }
+}
