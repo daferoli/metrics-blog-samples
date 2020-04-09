@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: example-node-app
+  name: example-node-app
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'example-node-app:latest'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: /example-app
+    git:
+      ref: master
+      uri: 'https://github.com/daferoli/metrics-blog-samples.git'
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'nodejs:10'
+        namespace: openshift
+    type: Source
+  triggers:
+    - generic:
+        secret: 1882ebf3b1aaed82
+      type: Generic
+    - type: ConfigChange
