@@ -5,7 +5,7 @@ const app = express();
 
 promClient.collectDefaultMetrics();
 
-app.get('/test', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Hello from the test endpoint');
 });
 

@@ -1,13 +1,17 @@
+# This file contains a new deployment and service that are almost the same as the ones in the example app iac folder
+# The key difference is that these will have different names to avoid conflicts and this will not have a route,
+# making it not accessable externally. Prometheus should still be able to read this.
+---
 apiVersion: v1
 kind: DeploymentConfig
 metadata:
   labels:
-    app: example-node-app
-  name: example-node-app
+    app: example-node-app-internal
+  name: example-node-app-internal
 spec:
   replicas: 1
   selector:
-    deploymentconfig: example-node-app
+    deploymentconfig: example-node-app-internal
   strategy:
     activeDeadlineSeconds: 21600
     resources: {}
@@ -21,13 +25,13 @@ spec:
   template:
     metadata:
       labels:
-        app: example-node-app
-        deploymentconfig: example-node-app
+        app: example-node-app-internal
+        deploymentconfig: example-node-app-internal
         monitor: prometheus
     spec:
       containers:
         - imagePullPolicy: Always
-          name: example-node-app
+          name: example-node-app-internal
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -50,11 +54,27 @@ spec:
     - imageChangeParams:
         automatic: true
         containerNames:
-          - example-node-app
+          - example-node-app-internal
         from:
           kind: ImageStreamTag
           name: 'example-node-app:latest'
           namespace: myproject
       type: ImageChange
     - type: ConfigChange
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: example-node-app-internal
+  name: example-node-app-internal
+spec:
+  ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    deploymentconfig: example-node-app-internal
+  sessionAffinity: None
+  type: ClusterIP

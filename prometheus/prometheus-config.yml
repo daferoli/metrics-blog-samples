@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: metrics
+data:
+  prometheus.yml: |-
+    global:
+      # How frequently to scrape targets by default.
+      scrape_interval: 1m
+
+      # How long until a scrape request times out.
+      scrape_timeout: 10s
+
+      # How frequently to evaluate rules.
+      evaluation_interval: 1m
+
+    # A list of scrape configurations.
+    scrape_configs:
+      # a basic config for prometheus to monitor itself. Good for validating that the configuration is live
+      - job_name: 'prometheus'
+
+        static_configs:
+        - targets: ['localhost:9090']
+      - job_name: myproject_pods
+
+        # The HTTP resource path on which to fetch metrics from targets.
+        metrics_path: /metrics 
+        # The information to access the Kubernetes API.
+        kubernetes_sd_configs:
+          # The Kubernetes role of entities that should be discovered.
+          - role: pod
+
+            # Optional namespace discovery. If omitted, all namespaces are used.
+            namespaces:
+              names:
+                - myproject
+
+            # Optional label and field selectors to limit the discovery process to a subset of available resources. 
+            # See https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/
+            # and https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ to learn more about the possible 
+            # filters that can be used. Endpoints role supports pod, service and endpoints selectors, other roles
+            # only support selectors matching the role itself (e.g. node role can only contain node selectors).
+
+            # Note: When making decision about using field/label selector make sure that this 
+            # is the best approach - it will prevent Prometheus from reusing single list/watch
+            # for all scrape configs. This might result in a bigger load on the Kubernetes API,
+            # because per each selector combination there will be additional LIST/WATCH. On the other hand,
+            # if you just want to monitor small subset of pods in large cluster it's recommended to use selectors.
+            # Decision, if selectors should be used or not depends on the particular situation.
+            selectors:
+              - role: pod  
+                label: "monitor == prometheus"
+     
